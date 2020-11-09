@@ -9,8 +9,8 @@ file.close()
 
 class MyClient(discord.Client):
     async def on_ready(self):
-        channel = client.get_channel(770213216449069067)
-        await channel.send(f'My public IP address is: {ip}')
+        channel = client.get_channel(619042012640837633)
+        await channel.send(f'<@&775201643133403137> Server online at: {ip}')
         print(f'Logged in as {self.user} and posted public IP')
 
     async def on_message(self, message):
@@ -18,8 +18,9 @@ class MyClient(discord.Client):
         if message.author == self.user:
             return
 
-        if message.content == 'ping':
-            await message.channel.send('pong')
+        if message.channel.id == 619042012640837633:
+            if message.content == '/status':
+                await message.channel.send(f'Server online at: {ip}')
 
 client = MyClient()
 client.run(token)
