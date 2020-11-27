@@ -1,6 +1,8 @@
 import discord
 from requests import get
 
+import server_stats
+
 ip = get('https://api.ipify.org').text
 
 file = open('token.txt', 'r')
@@ -21,6 +23,11 @@ class MyClient(discord.Client):
         if message.channel.id == 619042012640837633:
             if message.content == '/status':
                 await message.channel.send(f'Server online at: {ip}')
+
+        if message.channel.id == 619042012640837633:
+            if message.content == '/whomst':
+                await message.channel.send(server_stats.get_players("68.109.198.55",25565))
+        
 
 client = MyClient()
 client.run(token)
