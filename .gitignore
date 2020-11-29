@@ -1,6 +1,9 @@
 token.txt
 password.txt
+
 .DS_Store
+.project
+.pydevproject
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

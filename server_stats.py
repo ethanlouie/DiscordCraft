@@ -9,8 +9,7 @@ def get_players(host,port):
             elif len(players) > 0:
                 result = "Who's online:\n"
                 return result +"".join(str(player)+"\n" for player in players)
-    except ConnectionError:
+    except OSError or ConnectionError:
         return "server offline or otherwise unable to connect :("
-
-#test it out wit dis
-print(get_players("68.109.198.55",25565))
+    except Exception as e:
+        return repr(e)
