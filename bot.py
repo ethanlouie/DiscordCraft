@@ -19,13 +19,15 @@ class MyClient(discord.Client):
             return
 
         if message.channel.type == discord.ChannelType.private:
-            if message.content == '/nocontext':
-                await message.channel.send('random out of context quote feature coming soon')
             if message.content.startswith('/nocontext '):
-                await message.channel.send(message.content[11:])
+                channel = client.get_channel(619729375192940553)
+                await channel.send(message.content[11:])
 
         if message.channel.type == discord.ChannelType.private \
            or message.channel.id == 619042012640837633:
+            if message.content == '/help':
+                await message.channel.send('help feature coming soon')
+                
             if message.content == '/status':
                 await message.channel.send(f'Server online at: {ip}')
                 
@@ -34,6 +36,9 @@ class MyClient(discord.Client):
 
             if message.content == '/poweroff':
                 await message.channel.send('power off feature coming soon')
+
+            if message.content == '/nocontext':
+                await message.channel.send('random out of context quote feature coming soon')
 
 if __name__ == "__main__":
     client = MyClient()
