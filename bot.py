@@ -14,24 +14,24 @@ file = open('rcon.txt', 'r')
 rcon_password = file.read().strip()
 file.close()
 
-class MinecraftClient():
-    def __init__(self):
-        self._client = mcipc.rcon.Client('127.0.0.1', 25575)
-        client.login(rcon_password)
-    
-    def get_players(self) -> str:
-        try:
-            player_info = self._client.players
+def get_players() -> str:
+    try:
+        with mcipc.query.Client('127.0.0.1', 25575) as client:            
+            client.login(rcon_password)
+            
+            player_info = client.players
             if player_info[0] == 0:
                 return "no one online"
-            elif player_info[0] > 0:
+            else:
                 result = f'There are {player_info[0]} of a max of {player_info[1]} players online:\n'
                 return result +"".join(str(player)+"\n" for player in player_info[2])
-        except OSError or ConnectionError:
-            return "server offline or otherwise unable to connect :("
-        
-    def send_command(self, command) -> str:
-        return self._client.run(command)
+    except OSError or ConnectionError:
+        return "server offline or otherwise unable to connect :("
+
+def send_command(command) -> str:
+    with mcipc.query.Client('127.0.0.1', 25575) as client:            
+        client.login(rcon_password)
+        return client.run(command)
 
 class Whitelist():
     def __init__(self):
@@ -59,9 +59,8 @@ class Whitelist():
         if discord in self._users_dict:
             old_username = self._users_dict[discord]
             
-        rcon = MinecraftClient()
-        rcon.send_command(f'whitelist remove {old_username}')
-        rcon.send_command(f'whitelist add {minecraft}')
+        send_command(f'whitelist remove {old_username}')
+        send_command(f'whitelist add {minecraft}')
         
         self._users_dict[discord] = minecraft
         self._write_file()
@@ -79,7 +78,7 @@ class DiscordClient(discord.Client):
         
         if message.author == 'Ethan#6838' and message.content.startswith('/rcon '):
             try:
-                response = MinecraftClient().send_command(message.content[6:])
+                response = send_command(message.content[6:])
             except Exception as e:
                 response = str(e)
             await message.channel.send(response)
@@ -94,10 +93,11 @@ class DiscordClient(discord.Client):
         if message.channel.type == discord.ChannelType.private \
            or message.channel.id == 619042012640837633:
             if message.content == '/help':
-                await message.channel.send('/status -> shows ip of server' +
-                                           '/whomst -> lists players online' +
-                                           '/whitelist -> view players on whitelist' +
-                                           '/whitelist "minecraft username" -> add username to server whitelist (no quotes around username)')
+                await message.channel.send('/status -> shows ip of server\n' +
+                                           '/whomst -> lists players online\n' +
+                                           '/whitelist -> view players on whitelist\n' +
+                                           '/whitelist "minecraft username" -> add username to server whitelist (no quotes around username)\n' +
+                                           '/nocontext "quote" -> anonymously post a quote to out-of-context-quotes (must DM bot)')
                  
             if message.content == '/status':
                 await message.channel.send(f'server online at: {ip}\n' +
@@ -105,7 +105,7 @@ class DiscordClient(discord.Client):
                  
             if message.content == '/whomst' or message.content == '/list':
                 try:
-                    response = MinecraftClient().get_players()
+                    response = get_players()
                 except Exception as e:
                     response = str(e)
                 await message.channel.send(response)
