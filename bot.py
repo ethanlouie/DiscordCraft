@@ -17,7 +17,7 @@ file.close()
 
 def get_players() -> str:
     try:
-        with mcipc.query.Client('127.0.0.1', 25575) as client:            
+        with mcipc.rcon.Client('127.0.0.1', 25575) as client:            
             client.login(rcon_password)
             
             player_info = client.players
@@ -30,7 +30,7 @@ def get_players() -> str:
         return "server offline or otherwise unable to connect :("
 
 def send_command(command) -> str:
-    with mcipc.query.Client('127.0.0.1', 25575) as client:            
+    with mcipc.rcon.Client('127.0.0.1', 25575) as client:            
         client.login(rcon_password)
         return client.run(command)
 
@@ -77,7 +77,7 @@ class DiscordClient(discord.Client):
         if message.author == self.user:
             return
         
-        if message.author == 'Ethan#6838' and message.content.startswith('/rcon '):
+        if message.author.id == 180531137330937856 and message.content.startswith('/rcon '):
             try:
                 response = send_command(message.content[6:])
             except:
@@ -134,3 +134,28 @@ class DiscordClient(discord.Client):
 if __name__ == "__main__":
     client = DiscordClient()
     client.run(token)
+    
+    
+    
+    
+    
+    
+    try:
+        with mcipc.rcon.Client('127.0.0.1', 25575) as client:            
+            client.login(rcon_password)
+            
+            player_info = client.players
+            if player_info[0] == 0:
+                response = "no one online"
+            else:
+                response = f'There are {player_info[0]} of a max of {player_info[1]} players online:\n'
+                response += "".join(str(player)+"\n" for player in player_info[2])
+    except:
+        response = traceback.format_exc()
+        
+    print(response)
+
+
+
+
+
