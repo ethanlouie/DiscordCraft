@@ -1,8 +1,7 @@
 import discord
 from requests import get
-import server_stats
 import csv
-from mcipc.rcon import Client
+import mcipc
 
 whitelist_filename = 'whitelist.csv'
 ip = get('https://api.ipify.org').text
@@ -11,9 +10,28 @@ file = open('token.txt', 'r')
 token = file.read().strip()
 file.close()
 
-file = open('password.txt', 'r')
+file = open('rcon.txt', 'r')
 rcon_password = file.read().strip()
 file.close()
+
+class MinecraftClient():
+    def __init__(self):
+        self._client = mcipc.rcon.Client('127.0.0.1', 25575)
+        client.login(rcon_password)
+    
+    def get_players(self) -> str:
+        try:
+            player_info = self._client.players
+            if player_info[0] == 0:
+                return "no one online"
+            elif player_info[0] > 0:
+                result = f'There are {player_info[0]} of a max of {player_info[1]} players online:\n'
+                return result +"".join(str(player)+"\n" for player in player_info[2])
+        except OSError or ConnectionError:
+            return "server offline or otherwise unable to connect :("
+        
+    def send_command(self, command) -> str:
+        return self._client.run(command)
 
 class Whitelist():
     def __init__(self):
@@ -29,29 +47,27 @@ class Whitelist():
                 csv_writer.writerow([discord, minecraft])
                     
     def get_users(self) -> str:
-        try:            
-            users_str = 'all users in whitelist:\n'
-            for discord, minecraft in self._users_dict.items():
-                users_str += f'{discord} -> {minecraft}\n'
-            users_str += f'{len(self._users_dict)} users'
-            
-            return users_str
-        except Exception as e:
-            return repr(e)
+        users_str = 'all users in whitelist:\n'
+        for discord, minecraft in self._users_dict.items():
+            users_str += f'{discord} -> {minecraft}\n'
+        users_str += f'{len(self._users_dict)} users'
+        
+        return users_str
         
     def add_user(self, discord, minecraft) -> str:
-        try:            
-            if discord in self._users_dict:
-                pass
-                #whitelist remove minecraft
-            #whitelist add minecraft
-            self._users_dict[discord] = minecraft
-            self._write_file()
-            return f'your minecraft username has been updated to {minecraft}'
-        except Exception as e:
-            return repr(e)
-    
-class MyClient(discord.Client):
+        old_username = ''      
+        if discord in self._users_dict:
+            old_username = self._users_dict[discord]
+            
+        rcon = MinecraftClient()
+        rcon.send_command(f'whitelist remove {old_username}')
+        rcon.send_command(f'whitelist add {minecraft}')
+        
+        self._users_dict[discord] = minecraft
+        self._write_file()
+        return f'your minecraft username has been updated to {minecraft}'
+
+class DiscordClient(discord.Client):
     async def on_ready(self):
         channel = client.get_channel(619042012640837633)
 #        await channel.send(f'<@&775201643133403137> Server online at: {ip}')
@@ -60,7 +76,14 @@ class MyClient(discord.Client):
     async def on_message(self, message):
         if message.author == self.user:
             return
-         
+        
+        if message.author == 'Ethan#6838' and message.content.startswith('/rcon '):
+            try:
+                response = MinecraftClient().send_command(message.content[6:])
+            except Exception as e:
+                response = str(e)
+            await message.channel.send(response)
+            
         # DM only
         if message.channel.type == discord.ChannelType.private:
             if message.content.startswith('/nocontext '):
@@ -81,14 +104,26 @@ class MyClient(discord.Client):
                                            "don't forget to add yourself to the whitelist! (/help)")
                  
             if message.content == '/whomst' or message.content == '/list':
-                await message.channel.send(server_stats.get_players(ip,25565))
+                try:
+                    response = MinecraftClient().get_players()
+                except Exception as e:
+                    response = str(e)
+                await message.channel.send(response)
              
             if message.content == '/whitelist':
-                await message.channel.send(Whitelist().get_users())
+                try:
+                    response = Whitelist().get_users()
+                except Exception as e:
+                    response = str(e)
+                await message.channel.send(response)
              
             if message.content.startswith('/whitelist '):
-                await message.channel.send(Whitelist().add_user(str(message.author), message.content[11:]))
- 
+                try:
+                    response = Whitelist().add_user(str(message.author), message.content[11:])
+                except Exception as e:
+                    response = str(e)
+                await message.channel.send(response)
+                
             if message.content == '/poweroff':
                 await message.channel.send('power off feature coming soon')
  
@@ -96,15 +131,5 @@ class MyClient(discord.Client):
                 await message.channel.send('random out of context quote feature coming soon')
 
 if __name__ == "__main__":
-    client = MyClient()
+    client = DiscordClient()
     client.run(token)
-
-    with Client('68.109.198.55', 25565) as client:
-        client.login(rcon_password)    # Perform initial login.
-        print(client.seed)
-        print(client.help())
-
-
-
-
-
