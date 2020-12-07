@@ -2,6 +2,7 @@ import discord
 from requests import get
 import csv
 import mcipc
+import traceback
 
 whitelist_filename = 'whitelist.csv'
 ip = get('https://api.ipify.org').text
@@ -79,8 +80,8 @@ class DiscordClient(discord.Client):
         if message.author == 'Ethan#6838' and message.content.startswith('/rcon '):
             try:
                 response = send_command(message.content[6:])
-            except Exception as e:
-                response = str(e)
+            except:
+                response = traceback.format_exc()
             await message.channel.send(response)
             
         # DM only
@@ -106,22 +107,22 @@ class DiscordClient(discord.Client):
             if message.content == '/whomst' or message.content == '/list':
                 try:
                     response = get_players()
-                except Exception as e:
-                    response = str(e)
+                except:
+                    response = traceback.format_exc()
                 await message.channel.send(response)
              
             if message.content == '/whitelist':
                 try:
                     response = Whitelist().get_users()
-                except Exception as e:
-                    response = str(e)
+                except:
+                    response = traceback.format_exc()
                 await message.channel.send(response)
              
             if message.content.startswith('/whitelist '):
                 try:
                     response = Whitelist().add_user(str(message.author), message.content[11:])
-                except Exception as e:
-                    response = str(e)
+                except:
+                    response = traceback.format_exc()
                 await message.channel.send(response)
                 
             if message.content == '/poweroff':
