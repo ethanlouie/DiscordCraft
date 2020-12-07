@@ -70,7 +70,7 @@ class Whitelist():
 class DiscordClient(discord.Client):
     async def on_ready(self):
         channel = client.get_channel(619042012640837633)
-#        await channel.send(f'<@&775201643133403137> Server online at: {ip}')
+        await channel.send(f'<@&775201643133403137> Server online at: {ip}')
         print(f'logged in as {self.user} and posted public IP')
  
     async def on_message(self, message):
@@ -94,7 +94,8 @@ class DiscordClient(discord.Client):
         if message.channel.type == discord.ChannelType.private \
            or message.channel.id == 619042012640837633:
             if message.content == '/help':
-                await message.channel.send('/status -> shows ip of server\n' +
+                await message.channel.send('all commands:\n' +
+                                           '/status -> shows ip of server\n' +
                                            '/whomst -> lists players online\n' +
                                            '/whitelist -> view players on whitelist\n' +
                                            '/whitelist "minecraft username" -> add username to server whitelist (no quotes around username)\n' +
@@ -135,27 +136,3 @@ if __name__ == "__main__":
     client = DiscordClient()
     client.run(token)
     
-    
-    
-    
-    
-    
-    try:
-        with mcipc.rcon.Client('127.0.0.1', 25575) as client:            
-            client.login(rcon_password)
-            
-            player_info = client.players
-            if player_info[0] == 0:
-                response = "no one online"
-            else:
-                response = f'There are {player_info[0]} of a max of {player_info[1]} players online:\n'
-                response += "".join(str(player)+"\n" for player in player_info[2])
-    except:
-        response = traceback.format_exc()
-        
-    print(response)
-
-
-
-
-
