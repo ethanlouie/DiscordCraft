@@ -12,6 +12,7 @@ pip install requests
 /nocontext - replies with random out-of-context quote\
 /here "late" - automated meeting reminders/track attendance\
 /chess - AI chess engine\
+/play "song" - youtube/spotify API\
 /lamp "hex color" - control RGB LED strips (@house only)\
 /print "text" - network connected printer\
 rcon - automatic backups to google drive\
