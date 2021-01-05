@@ -19,4 +19,5 @@ rcon - automatic backups to google drive\
 dynamic dns - minecraft.ucitriangle.com subdomain\
 wrong channel message\
 track total time played for each minecraft player\
-steal original Adam Bot from Tim
+steal original Adam Bot from Tim\
+traceback function wrapper
