@@ -4,6 +4,7 @@ import csv
 import mcipc
 import traceback
 from datetime import datetime, timedelta
+from os import system
 
 intents = discord.Intents.default()
 intents.members = True
@@ -20,6 +21,14 @@ rcon_password = file.read().strip()
 file.close()
 
 LATE_ATTENDANCE_CUTOFF_MINS = 5
+
+def print_text(message):
+    output = 'START TRANSMISSION\N\N' 
+    f = open('temp.txt', mode=w)
+    f.write(f'START TRANSMISSION\n\n{message}\n\nEND TRANSMISSION')
+    f.close()
+    
+    system('lp temp.txt')
 
 def get_players() -> str:
     try:
@@ -183,7 +192,13 @@ class DiscordClient(discord.Client):
             if message.content.startswith('/nocontext '):
                 channel = client.get_channel(619729375192940553)
                 await channel.send(message.content[11:])
-         
+                
+            if message.content.startswith('/print '):
+                try:
+                    print_text(message.content[7:])
+                except:
+                    await message.channel.send(traceback.format_exc())
+                         
         # DM or bot-commands channel
         if message.channel.type == discord.ChannelType.private \
            or message.channel.id == 619042012640837633:
