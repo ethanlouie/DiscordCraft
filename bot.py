@@ -5,6 +5,7 @@ import mcipc
 import traceback
 from datetime import datetime, timedelta
 from os import system
+from collections import defaultdict
 
 intents = discord.Intents.default()
 intents.members = True
@@ -23,8 +24,7 @@ file.close()
 LATE_ATTENDANCE_CUTOFF_MINS = 5
 
 def print_text(message):
-    output = 'START TRANSMISSION\N\N' 
-    f = open('temp.txt', mode=w)
+    f = open('temp.txt', mode='w')
     f.write(f'START TRANSMISSION\n\n{message}\n\nEND TRANSMISSION')
     f.close()
     
@@ -49,6 +49,30 @@ def send_command(command) -> str:
         client.login(rcon_password)
         return client.run(command)
 
+class Voting():
+    def __init__(self, options):
+        self.options = options.split(', ')
+        self.vote_count = defaultdict(int)
+        self.voted = defaultdict(bool)
+        
+    def add_vote(self, voter, vote):
+        if self.voted[voter]:
+            return 'cannot vote more than once'
+        else:
+            self.vote_count[vote] += 1
+            self.voted[voter] = True
+            return f'vote for {vote} counted'
+        
+    def get_results(self):
+        response = ''
+        for name, votes in self.vote_count.items():
+            response += f'{name}: {votes} votes\n'
+        if len(response) == 0:
+            return 'no votes'
+        else:
+            return response
+        
+        
 class Whitelist():
     def __init__(self):
         self._users_dict = dict()
@@ -127,12 +151,12 @@ class DiscordClient(discord.Client):
     
     def __init__(self, intents):
         self.attendance = None
+        self.voting = None
         super().__init__(intents=intents)
     
     async def on_ready(self):
         channel = client.get_channel(619042012640837633)
-#         await channel.send(f'<@&775201643133403137> Server online at: {ip}')
-        print(f'logged in as {self.user} and posted public IP')
+        print(f'logged in as {self.user}')
  
     async def on_message(self, message):
         if message.author == self.user:
@@ -170,6 +194,12 @@ class DiscordClient(discord.Client):
                 except:
                     response = traceback.format_exc()
                 await message.channel.send(response)
+                
+
+                
+                
+                
+                
 
         # Attendance channel
         if self.attendance != None and message.channel == self.attendance.channel:
@@ -198,7 +228,46 @@ class DiscordClient(discord.Client):
                     print_text(message.content[7:])
                 except:
                     await message.channel.send(traceback.format_exc())
-                         
+                    
+            if self.voting is not None and message.content in self.voting.options:
+                try:
+                    response = self.voting.add_vote(message.author, message.content)
+                except:
+                    response = traceback.format_exc()
+                await message.channel.send(response)
+                    
+                    
+            if message.author.id == 180531137330937856:   
+                if message.content.startswith('/vote start '):
+                    try:
+                        self.voting = Voting(message.content[12:])
+                        
+                        guild = self.get_guild(612510788711874573)
+                        uci_active_role = discord.utils.get(guild.roles, id=800855349640822784)#697616737755070534)
+                        
+                        for member in guild.members:
+                            if uci_active_role in member.roles:
+                                await member.send(f'reply to this message with your vote\nif you dont receive a response, your vote has not been counted\nyour options: {message.content[12:]}')
+                    except:
+                        await message.channel.send(traceback.format_exc())
+                
+                if message.content == '/vote':
+                    try:
+                        response = self.voting.get_results()
+                    except:
+                        response = traceback.format_exc()
+                    await message.channel.send(response) 
+                    
+                if message.content == '/vote stop':
+                    try:
+                        response = self.voting.get_results()
+                        self.voting = None
+                    except:
+                        response = traceback.format_exc()
+                    await message.channel.send(response) 
+                    
+                    
+                                            
         # DM or bot-commands channel
         if message.channel.type == discord.ChannelType.private \
            or message.channel.id == 619042012640837633:
