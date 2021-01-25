@@ -163,7 +163,7 @@ class DiscordClient(discord.Client):
             return
         
         # Ethan only
-        if message.author.id == 180531137330937856:   
+        if message.author.id == 180531137330937856:
             if message.content.startswith('/rcon '):
                 try:
                     response = send_command(message.content[6:])
@@ -237,13 +237,21 @@ class DiscordClient(discord.Client):
                 await message.channel.send(response)
                     
                     
+            if message.content.startswith('/play '):
+                try:
+                    system(f'youtube-dl -q -o- {message.content[6:]} | sudo mplayer -vo fbdev2 -cache 8192 - &')
+                    response = 'playing video'
+                except:
+                    response = traceback.format_exc()
+                await message.channel.send(response)
+                    
             if message.author.id == 180531137330937856:   
                 if message.content.startswith('/vote start '):
                     try:
                         self.voting = Voting(message.content[12:])
                         
                         guild = self.get_guild(612510788711874573)
-                        uci_active_role = discord.utils.get(guild.roles, id=800855349640822784)#697616737755070534)
+                        uci_active_role = discord.utils.get(guild.roles, id=697616737755070534)
                         
                         for member in guild.members:
                             if uci_active_role in member.roles:
@@ -306,13 +314,8 @@ class DiscordClient(discord.Client):
                 
             if message.content == '/poweroff':
                 await message.channel.send('power off feature coming soon')
- 
-            if message.content == '/nocontext':
-                await message.channel.send('random out of context quote feature coming soon')
-                
-            if message.content == '/here':
-                await message.channel.send('attendance feature coming soon')
 
+                
 if __name__ == "__main__":
     client = DiscordClient(intents=intents)
     client.run(token)
