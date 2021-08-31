@@ -239,7 +239,7 @@ class DiscordClient(discord.Client):
                     
             if message.content.startswith('/play '):
                 try:
-                    system(f'youtube-dl -q -o- {message.content[6:]} | sudo mplayer -vo fbdev2 -cache 8192 - &')
+                    system(f'youtube-dl -q -o- {message.content[6:]} | sudo mplayer -vo fbdev2 -cache 8192 -')
                     response = 'playing video'
                 except:
                     response = traceback.format_exc()
