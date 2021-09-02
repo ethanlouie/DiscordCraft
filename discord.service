@@ -3,10 +3,10 @@ Description=Discord Bot
 After=network.target
 
 [Service]
-WorkingDirectory=/home/ethan/DiscordCraft
-User=ethan
+WorkingDirectory=/home/triangle/DiscordCraft
+User=triangle
 Type=idle
-ExecStart=/usr/bin/python3 /home/ethan/DiscordCraft/bot.py &> /dev/null
+ExecStart=/usr/bin/python3 bot.py &> /dev/null
 Restart=always
 
 [Install]
